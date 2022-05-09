@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "dgSpecHash": "U5FbZ8hso4ZJlW0A8C33nKmbJphwn+U86Ep7+6d2VD7y8Gy59p+hstafdBT4S+WBtnkvPxCbB1f93iYoxaXFQQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\mcank\\source\\repos\\GoogleApis.Blazor\\GoogleApis.Blazor\\GoogleApis.Blazor.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.aspnetcore.authorization\\6.0.4\\microsoft.aspnetcore.authorization.6.0.4.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.aspnetcore.components\\6.0.4\\microsoft.aspnetcore.components.6.0.4.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\6.0.4\\microsoft.aspnetcore.components.analyzers.6.0.4.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.aspnetcore.metadata\\6.0.4\\microsoft.aspnetcore.metadata.6.0.4.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.0\\microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\6.0.0\\microsoft.extensions.dependencyinjection.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.http\\6.0.0\\microsoft.extensions.http.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.logging\\6.0.0\\microsoft.extensions.logging.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.1\\microsoft.extensions.logging.abstractions.6.0.1.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.options\\6.0.0\\microsoft.extensions.options.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.extensions.primitives\\6.0.0\\microsoft.extensions.primitives.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\microsoft.jsinterop\\6.0.4\\microsoft.jsinterop.6.0.4.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.0\\system.diagnostics.diagnosticsource.6.0.0.nupkg.sha512",
+    "C:\\Users\\mcank\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
