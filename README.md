@@ -18,6 +18,8 @@ Welcome to all contributors!
 
 
 ## Usage
+### Preliminary: Set your google account and your project credentials
+Nothing special with this package.
 ### Step 1: Inject HttpClientFactory
 
 For blazor component files
