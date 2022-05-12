@@ -19,6 +19,7 @@
         public string id { get; set; }
         public string summary { get; set; }
         public string description { get; set; }
+        public string location { get; set; }
         public string timeZone { get; set; }
         public string colorId { get; set; }
         public string backgroundColor { get; set; }
