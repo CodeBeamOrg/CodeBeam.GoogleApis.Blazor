@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-
+#pragma warning disable CS1591
 namespace GoogleApis.Blazor
 {
     public static class EnumExtensions
@@ -58,6 +58,26 @@ namespace GoogleApis.Blazor
         TokenType,
         [Description("expires_in")]
         ExpiresIn,
+    }
+
+    public enum CalendarValueType
+    {
+        [Description("summary")]
+        Summary,
+        [Description("description")]
+        Description,
+        [Description("location")]
+        Location,
+    }
+
+    public enum EventValueType
+    {
+        [Description("summary")]
+        Summary,
+        [Description("description")]
+        Description,
+        [Description("location")]
+        Location,
     }
 
 }
