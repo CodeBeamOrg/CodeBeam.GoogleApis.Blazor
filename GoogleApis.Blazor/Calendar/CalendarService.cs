@@ -29,7 +29,7 @@ namespace GoogleApis.Blazor.Calendar
         private string _accessToken = "";
 
         /// <summary>
-        /// The access token using throughout the class.
+        /// The access token using throughout this service.
         /// </summary>
         public string AccessToken 
         {
@@ -88,7 +88,7 @@ namespace GoogleApis.Blazor.Calendar
             {
                 return "error: Can't fetch calendars.";
             }
-            GoogleCalendarRoot jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarRoot>(calendars);
+            GoogleCalendarListRoot jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarListRoot>(calendars);
 
             if (jsonCalendar.items == null)
             {
@@ -114,24 +114,17 @@ namespace GoogleApis.Blazor.Calendar
         }
 
         /// <summary>
-        /// Add a new secondary calendar into user's CalendarList.
+        /// Creates a new secondary calendar into user's CalendarList.
         /// </summary>
-        /// <param name="accessToken">abc</param>
+        /// <param name="googleCalendarListModel"></param>
         /// <returns>Returns the request's result content.</returns>
-        public string AddCalendar(string accessToken, string calendarTitle, string description = "", string timeZone = "")
+        public string AddCalendar(GoogleCalendarListModel googleCalendarListModel)
         {
-            GoogleCalendarModel calendar = new()
-            {
-                summary = calendarTitle,
-                description = description,
-                timeZone = timeZone,
-            };
-
-            string requestBody = JsonSerializer.Serialize(calendar);
+            string requestBody = JsonSerializer.Serialize(googleCalendarListModel);
 
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars", content).Result;
@@ -144,20 +137,19 @@ namespace GoogleApis.Blazor.Calendar
             return result.Content.ReadAsStringAsync().Result;
         }
 
-        public string UpdateCalendar(string accessToken, string calendarId, string calendarTitle, string description = "", string timeZone = "")
+        /// <summary>
+        /// Updates the specified calendar with given model.
+        /// </summary>
+        /// <param name="calendarId"></param>
+        /// <param name="googleCalendarListModel"></param>
+        /// <returns></returns>
+        public string UpdateCalendar(string calendarId, GoogleCalendarListModel googleCalendarListModel)
         {
-            GoogleCalendarModel calendar = new()
-            {
-                summary = calendarTitle,
-                description = description,
-                timeZone = timeZone,
-            };
-
-            string requestBody = JsonSerializer.Serialize(calendar);
+            string requestBody = JsonSerializer.Serialize(googleCalendarListModel);
 
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
             var result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}", content).Result;
@@ -263,7 +255,7 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="calendarEvent"></param>
         /// <param name="calendarId"></param>
         /// <returns></returns>
-        public string AddEvent(GoogleCalendarEvent calendarEvent, string calendarId)
+        public string AddEvent(GoogleCalendarEventModel calendarEvent, string calendarId)
         {
             string requestBody = JsonSerializer.Serialize(calendarEvent);
 
@@ -287,7 +279,7 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="eventId"></param>
         /// <param name="calendarId"></param>
         /// <returns></returns>
-        public string UpdateEvent(GoogleCalendarEvent newCalendarEvent, string eventId, string calendarId)
+        public string UpdateEvent(GoogleCalendarEventModel newCalendarEvent, string eventId, string calendarId)
         {
             string requestBody = JsonSerializer.Serialize(newCalendarEvent);
 
@@ -426,6 +418,7 @@ namespace GoogleApis.Blazor.Calendar
 
         /// <summary>
         /// Finds the event with given description in given GoogleCalendarEventRoot.items collection.
+        /// </summary>
         /// <param name="description"></param>
         /// <param name="googleCalendarEventRoot"></param>
         /// <param name="calendarId"></param>
@@ -502,7 +495,7 @@ namespace GoogleApis.Blazor.Calendar
             {
                 return "error: Can't fetch calendars.";
             }
-            GoogleCalendarRoot googleCalendarRoot = JsonSerializer.Deserialize<GoogleCalendarRoot>(calendars);
+            GoogleCalendarListRoot googleCalendarRoot = JsonSerializer.Deserialize<GoogleCalendarListRoot>(calendars);
 
             if (googleCalendarRoot.items == null)
             {
@@ -560,60 +553,54 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         /// <param name="valueType"></param>
         /// <param name="val"></param>
+        /// <param name="timeMin"></param>
+        /// <param name="timeMax"></param>
+        /// <param name="calendarId"></param>
         /// <returns></returns>
-        public string FindEventId(EventValueType valueType, object val)
+        public string FindEventId(EventValueType valueType, object val, DateTime timeMin, DateTime timeMax, string calendarId)
         {
-            //string result = GetCalendarBySummary(summary);
-            //GoogleCalendarModel jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarModel>(result);
-
-            //if (string.IsNullOrEmpty(jsonCalendar.id))
-            //{
-            //    return "none";
-            //}
-            //return jsonCalendar.id;
-
-            string calendars = GetCalendars();
-            if (calendars == "error")
+            string googleEvents = GetEvents(timeMin, timeMax, calendarId);
+            if (googleEvents == "error")
             {
                 return "error: Can't fetch calendars.";
             }
-            GoogleCalendarRoot googleCalendarRoot = JsonSerializer.Deserialize<GoogleCalendarRoot>(calendars);
+            GoogleCalendarEventRoot googleCalendarEventRoot = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(googleEvents);
 
-            if (googleCalendarRoot.items == null)
+            if (googleCalendarEventRoot.items == null)
             {
                 return "none";
             }
 
-            string calendarId = "";
+            string eventId = "";
             if (valueType == EventValueType.Summary)
             {
-                foreach (var item in googleCalendarRoot.items)
+                foreach (var item in googleCalendarEventRoot.items)
                 {
                     if (item.summary == val.ToString())
                     {
-                        calendarId = item.id;
+                        eventId = item.id;
                         break;
                     }
                 }
             }
             else if (valueType == EventValueType.Description)
             {
-                foreach (var item in googleCalendarRoot.items)
+                foreach (var item in googleCalendarEventRoot.items)
                 {
                     if (item.description == val.ToString())
                     {
-                        calendarId = item.id;
+                        eventId = item.id;
                         break;
                     }
                 }
             }
             else if (valueType == EventValueType.Location)
             {
-                foreach (var item in googleCalendarRoot.items)
+                foreach (var item in googleCalendarEventRoot.items)
                 {
                     if (item.location == val.ToString())
                     {
-                        calendarId = item.id;
+                        eventId = item.id;
                         break;
                     }
                 }
@@ -625,7 +612,7 @@ namespace GoogleApis.Blazor.Calendar
             }
             else
             {
-                return calendarId;
+                return eventId;
             }
 
         }

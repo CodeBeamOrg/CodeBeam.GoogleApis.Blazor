@@ -1,20 +1,25 @@
 ﻿namespace GoogleApis.Blazor.Models
+#pragma warning disable CS1591
 {
-    public class Creator
+    /// <summary>
+    /// A root class represents google calendar event api results.
+    /// </summary>
+    public class GoogleCalendarEventRoot
     {
-        public string id { get; set; }
-        public string email { get; set; }
-        public string displayName { get; set; }
-        public bool self { get; set; }
-    }
-
-    public class End
-    {
-        public string dateTime { get; set; }
+        public string kind { get; set; } = "calendar#events";
+        public string etag { get; set; }
+        public string summary { get; set; }
+        public string description { get; set; }
+        public string updated { get; set; }
         public string timeZone { get; set; }
+        public string accessRole { get; set; }
+        public List<DefaultReminder> defaultReminders { get; set; }
+        public string nextPageToken { get; set; }
+        public string nextSyncToken { get; set; }
+        public List<GoogleCalendarEventModel> items { get; set; }
     }
 
-    public class GoogleCalendarEvent
+    public class GoogleCalendarEventModel
     {
         public string kind { get; set; } = "calendar#event";
         public string etag { get; set; } = "";
@@ -38,37 +43,5 @@
         public int sequence { get; set; }
         public Reminders reminders { get; set; } = new();
         public string eventType { get; set; } = "default";
-    }
-
-    public class Organizer
-    {
-        public string id { get; set; }
-        public string email { get; set; }
-        public string displayName { get; set; }
-        public bool self { get; set; }
-    }
-
-    public class Reminders
-    {
-        public bool useDefault { get; set; }
-    }
-
-    public class GoogleCalendarEventRoot
-    {
-        public string kind { get; set; }
-        public string etag { get; set; }
-        public string summary { get; set; }
-        //public DateTime updated { get; set; }
-        public string timeZone { get; set; }
-        public string accessRole { get; set; }
-        public List<object> defaultReminders { get; set; }
-        public string nextSyncToken { get; set; }
-        public List<GoogleCalendarEvent> items { get; set; }
-    }
-
-    public class Start
-    {
-        public string dateTime { get; set; }
-        public string timeZone { get; set; }
     }
 }
