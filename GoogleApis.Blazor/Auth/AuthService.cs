@@ -12,11 +12,19 @@ using System.Web;
 
 namespace GoogleApis.Blazor.Auth
 {
+    /// <summary>
+    /// A class about Google OAuth2 and some user process.
+    /// </summary>
     public class AuthService
     {
-        [Inject] IJSRuntime JSRuntime { get; set; }
         [Inject] IHttpClientFactory HttpClientFactory { get; set; }
-
+        [Inject] IJSRuntime JSRuntime { get; set; }
+        
+        /// <summary>
+        /// Constructs the class.
+        /// </summary>
+        /// <param name="jsRuntime"></param>
+        /// <param name="httpClientFactory"></param>
         public AuthService(IJSRuntime jsRuntime, IHttpClientFactory httpClientFactory)
         {
             JSRuntime = jsRuntime;
@@ -27,14 +35,24 @@ namespace GoogleApis.Blazor.Auth
         /// oAuth2 Step 1. Opens "Select Google Account" page in a new tab and return the value into redirectUrl.
         /// </summary>
         /// <param name="clientId"></param>
-        /// <param name="scope"></param>
+        /// <param name="scopes"></param>
         /// <param name="redirectUrl"></param>
         /// <returns></returns>
-        public async Task RequestAuthorizationCode(string clientId, Scope scope, string redirectUrl)
+        public async Task RequestAuthorizationCode(string clientId, List<Scope> scopes, string redirectUrl)
         {
             string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
-            await JSRuntime.InvokeAsync<object>("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scope.ToDescriptionString()}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt=consent", "_blank");
+            if (scopes == null || scopes.Count == 0)
+            {
+                return;
+            }
+            List<string> scopeStringList = new List<string>();
+            foreach (var scope in scopes)
+            {
+                scopeStringList.Add(scope.ToDescriptionString());
+            }
+            string scopeString = string.Join("+", scopeStringList);
 
+            await JSRuntime.InvokeAsync<object>("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt=consent", "_blank");
         }
 
         /// <summary>
@@ -59,6 +77,35 @@ namespace GoogleApis.Blazor.Auth
             return request.Content.ReadAsStringAsync().Result;
         }
 
+        /// <summary>
+        /// Get authenticated user's e-mail adress.
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public string GetUserMail(string accessToken)
+        {
+            var client = HttpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var result = client.GetAsync("https://www.googleapis.com/userinfo/v2/me").Result;
+
+            if (!result.IsSuccessStatusCode)
+            {
+                return "error";
+            }
+
+            var jsonResult = JsonDocument.Parse(result.Content.ReadAsStringAsync().Result);
+            string email = jsonResult.RootElement.GetProperty("email").ToString();
+
+            return email;
+        }
+
+        /// <summary>
+        /// Brings a value into a given credential string. The string can be obtain with result of AuthorizeCredential method.
+        /// </summary>
+        /// <param name="credential"></param>
+        /// <param name="credentialValueType"></param>
+        /// <returns></returns>
         public string GetValueFromCredential(string credential, CredentialValueType credentialValueType)
         {
             string accessToken = string.Empty;
@@ -67,6 +114,24 @@ namespace GoogleApis.Blazor.Auth
             accessToken = jsonResult.RootElement.GetProperty(credentialValueType.ToDescriptionString()).ToString();
 
             return accessToken;
+        }
+
+        /// <summary>
+        /// Get information with given accesstoken like scope, expires in etc. Returns a json format.
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public string GetAccessTokenDetails(string accessToken)
+        {
+            var client = HttpClientFactory.CreateClient();
+            var result = client.GetAsync($"https://oauth2.googleapis.com/tokeninfo?access_token={accessToken}").Result;
+
+            if (!result.IsSuccessStatusCode)
+            {
+                return "error";
+            }
+
+            return result.Content.ReadAsStringAsync().Result;
         }
 
     }

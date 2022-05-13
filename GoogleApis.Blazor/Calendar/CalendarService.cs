@@ -481,15 +481,6 @@ namespace GoogleApis.Blazor.Calendar
         /// <returns></returns>
         public string FindCalendarId(CalendarValueType valueType, object val)
         {
-            //string result = GetCalendarBySummary(summary);
-            //GoogleCalendarModel jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarModel>(result);
-
-            //if (string.IsNullOrEmpty(jsonCalendar.id))
-            //{
-            //    return "none";
-            //}
-            //return jsonCalendar.id;
-
             string calendars = GetCalendars();
             if (calendars == "error")
             {
@@ -606,7 +597,7 @@ namespace GoogleApis.Blazor.Calendar
                 }
             }
 
-            if (string.IsNullOrEmpty(calendarId))
+            if (string.IsNullOrEmpty(eventId))
             {
                 return "none";
             }
