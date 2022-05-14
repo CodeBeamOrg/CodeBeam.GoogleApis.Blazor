@@ -37,13 +37,14 @@ namespace GoogleApis.Blazor.Auth
         }
 
         /// <summary>
-        /// oAuth2 Step 1. Opens "Select Google Account" page in a new tab and return the value into redirectUrl.
+        /// oAuth2 Step 1. Opens "Select Google Account" page in a new tab and return the value into redirectUrl. Default prompt is consent, which asked for user permission each time (none for not opening consent page and select account for account select account page).
         /// </summary>
         /// <param name="clientId"></param>
         /// <param name="scopes"></param>
         /// <param name="redirectUrl"></param>
+        /// <param name="promptType"></param>
         /// <returns></returns>
-        public async Task RequestAuthorizationCode(string clientId, List<Scope> scopes, string redirectUrl)
+        public async Task RequestAuthorizationCode(string clientId, List<Scope> scopes, string redirectUrl, PromptType promptType = PromptType.Consent)
         {
             string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
             if (scopes == null || scopes.Count == 0)
@@ -57,7 +58,7 @@ namespace GoogleApis.Blazor.Auth
             }
             string scopeString = string.Join("+", scopeStringList);
 
-            await JSRuntime.InvokeAsync<object>("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt=consent", "_blank");
+            await JSRuntime.InvokeAsync<object>("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt={promptType.ToDescriptionString()}", "_blank");
         }
 
         /// <summary>

@@ -69,4 +69,14 @@ namespace GoogleApis.Blazor
         Location,
     }
 
+    public enum PromptType
+    {
+        [Description("none")]
+        None,
+        [Description("consent")]
+        Consent,
+        [Description("select_account")]
+        SelectAccount,
+    }
+
 }
