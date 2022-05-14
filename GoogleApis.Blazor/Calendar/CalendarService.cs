@@ -49,11 +49,6 @@ namespace GoogleApis.Blazor.Calendar
             //This uses calendar list instead of calendar. Read for the difference https://developers.google.com/calendar/api/concepts/events-calendars#calendar_and_calendar_list
             var result = client.GetAsync("https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=" + _accessToken).Result;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
-
             return result.Content.ReadAsStringAsync().Result;
         }
 
@@ -65,13 +60,7 @@ namespace GoogleApis.Blazor.Calendar
         public string GetCalendarById(string calendarId)
         {
             var client = HttpClientFactory.CreateClient();
-
             var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/users/me/calendarList/{calendarId}?access_token=" + _accessToken).Result;
-
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -84,10 +73,6 @@ namespace GoogleApis.Blazor.Calendar
         public string GetCalendarBySummary(string summary)
         {
             string calendars = GetCalendars();
-            if (calendars == "error")
-            {
-                return "error: Can't fetch calendars.";
-            }
             GoogleCalendarListRoot jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarListRoot>(calendars);
 
             if (jsonCalendar.items == null)
@@ -129,11 +114,6 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars", content).Result;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
-
             return result.Content.ReadAsStringAsync().Result;
         }
 
@@ -154,11 +134,6 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}", content).Result;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
-
             return result.Content.ReadAsStringAsync().Result;
         }
 
@@ -174,11 +149,6 @@ namespace GoogleApis.Blazor.Calendar
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
 
             var result = client.DeleteAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}").Result;
-
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -196,11 +166,6 @@ namespace GoogleApis.Blazor.Calendar
             var content = new StringContent("", Encoding.UTF8, "application/json");
 
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/clear", content).Result;
-
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -222,11 +187,6 @@ namespace GoogleApis.Blazor.Calendar
             var client = HttpClientFactory.CreateClient();
             var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events?access_token={_accessToken}&maxResults=2500").Result;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
-
             return result.Content.ReadAsStringAsync().Result;
         }
 
@@ -240,11 +200,6 @@ namespace GoogleApis.Blazor.Calendar
         {
             var client = HttpClientFactory.CreateClient();
             var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}?access_token=" + _accessToken).Result;
-
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -264,10 +219,6 @@ namespace GoogleApis.Blazor.Calendar
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events", content).Result;
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -300,10 +251,6 @@ namespace GoogleApis.Blazor.Calendar
             //    result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}", content).Result;
             //}
             result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}", content).Result;
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
@@ -319,10 +266,6 @@ namespace GoogleApis.Blazor.Calendar
         public string GetEventBySummary(string summary, DateTime dateMin, DateTime dateMax, string calendarId)
         {
             string events = GetEvents(dateMin, dateMax, calendarId);
-            if (events == "error")
-            {
-                return "error: Can't fetch calendars.";
-            }
             GoogleCalendarEventRoot jsonEvent = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(events);
 
             if (jsonEvent.items == null)
@@ -551,10 +494,6 @@ namespace GoogleApis.Blazor.Calendar
         public string FindEventId(EventValueType valueType, object val, DateTime timeMin, DateTime timeMax, string calendarId)
         {
             string googleEvents = GetEvents(timeMin, timeMax, calendarId);
-            if (googleEvents == "error")
-            {
-                return "error: Can't fetch calendars.";
-            }
             GoogleCalendarEventRoot googleCalendarEventRoot = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(googleEvents);
 
             if (googleCalendarEventRoot.items == null)
