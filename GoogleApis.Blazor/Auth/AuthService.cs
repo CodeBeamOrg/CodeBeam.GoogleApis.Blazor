@@ -89,11 +89,6 @@ namespace GoogleApis.Blazor.Auth
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             var result = client.GetAsync("https://www.googleapis.com/userinfo/v2/me").Result;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
-
             var jsonResult = JsonDocument.Parse(result.Content.ReadAsStringAsync().Result);
             string email = jsonResult.RootElement.GetProperty("email").ToString();
 
@@ -125,11 +120,6 @@ namespace GoogleApis.Blazor.Auth
         {
             var client = HttpClientFactory.CreateClient();
             var result = client.GetAsync($"https://oauth2.googleapis.com/tokeninfo?access_token={accessToken}").Result;
-
-            if (!result.IsSuccessStatusCode)
-            {
-                return "error";
-            }
 
             return result.Content.ReadAsStringAsync().Result;
         }
