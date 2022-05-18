@@ -13,7 +13,7 @@ namespace GoogleApis.Blazor.Extensions
     /// <summary>
     /// A static class contains codebeam google api services. The lifetime is scoped.
     /// </summary>
-    public static class ServiceCollectionExtension
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         /// Adds all codebeam google services.
