@@ -19,8 +19,22 @@ Welcome to all contributors!
 
 ## Usage
 ### Preliminary: Set your google account and your project credentials
-Nothing special with this package.
-### Step 1: Inject HttpClientFactory
+Set your google client. This process has no special thing with this library. [Read the details.](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
+<br /> Add the credential into appsettings.json file like the below example. (Not obligatory, but ClientId, ClientSecret and RedirectUrl is required for some features to use this library simpler.)
+```json
+{
+  "GoogleClient": {
+    "client_id": "[CLIENT_ID]",
+    "project_id": "",
+    "auth_uri": "",
+    "token_uri": "",
+    "auth_provider_x509_cert_url": "",
+    "client_secret": "[CLIENT_SECRET]",
+    "redirect_url": "[REDIRECT_URL]"
+  }
+}
+```
+### Step 1: Inject Services
 
 Add Services into program.cs
 ```cs
@@ -29,10 +43,12 @@ builder.Services.AddCodeBeamGoogleApiServices();
 
 For blazor component files
 ```razor
+@inject AuthService AuthService
 @inject CalendarService CalendarService
 ```
-For cs files
+OR - For cs files
 ```cs
+[Inject] AuthService AuthService { get; set; }
 [Inject] CalendarService CalendarService { get; set; }
 ```
 
@@ -66,7 +82,7 @@ private async Task RequestCode()
 ```
 #### Step 2. Get Access Token With Obtained Authorization Code in Step 1
 These codes should be in the callback page.
-Blazor Component
+<br /> Blazor Component
 ```razor
 @page "/v1/browser-callback"
 ```
@@ -107,4 +123,20 @@ private void AddEvent()
     // If you don't know the id of calendar which will the event be added, use FindCalendarId method. In this case, the event added the calendar which has "Test Calendar" title.
     string result = CalendarService.AddEvent(googleCalendarEvent, CalendarService.FindCalendarId(CalendarValueType.Summary, "Test Calendar"));
 }
+```
+
+## How To Get and Process Lists (Like Calendar and Event)
+When you call the api to return a list of items (like calendars or events) it returns a root class. These classes can be find in the library. You can use the "items" property to reach list of items.
+<br />
+<br />
+#### The Models
+- GoogleCalendarListRoot -> The root calendar model which is a proper for `GetCalendars()` method result
+- GoogleCalendarListModel -> The calendar model. GoogleCalendarListRoot.items has a `List<GoogleCalendarListModel>`
+- GoogleCalendarEventRoot -> The root event model which is a proper for `GetEvents()` method result
+- GoogleCalendarEventModel -> The event model. GoogleCalendarEventRoot.items has a `List<GoogleCalendarEventModel>`
+
+#### Usage
+```cs
+var result = CalendarService.GetCalendars();
+GoogleCalendarListRoot _calendars = JsonSerializer.Deserialize<GoogleCalendarListRoot>(result); // _calendars.items has the list of calendars.
 ```
