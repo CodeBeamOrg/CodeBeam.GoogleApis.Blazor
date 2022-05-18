@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <PackageIcon>CodeBeam-01.jpg</PackageIcon>
     <Copyright>Copyright 2022 CodeBeam</Copyright>
     <Description>A utility package for Google Apis in Blazor.</Description>
