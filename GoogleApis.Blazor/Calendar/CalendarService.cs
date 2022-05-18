@@ -1,4 +1,6 @@
-﻿using GoogleApis.Blazor.Models;
+﻿using GoogleApis.Blazor.Auth;
+using GoogleApis.Blazor.Extensions;
+using GoogleApis.Blazor.Models;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -16,17 +18,21 @@ namespace GoogleApis.Blazor.Calendar
     public class CalendarService
     {
         [Inject] IHttpClientFactory HttpClientFactory { get; set; }
+        [Inject] AuthService AuthService { get; set; }
 
         /// <summary>
         /// Constructs the class.
         /// </summary>
         /// <param name="httpClientFactory"></param>
-        public CalendarService(IHttpClientFactory httpClientFactory)
+        /// <param name="authService"></param>
+        public CalendarService(IHttpClientFactory httpClientFactory, AuthService authService)
         {
             HttpClientFactory = httpClientFactory;
+            AuthService = authService;
         }
 
         private string _accessToken = "";
+        private string _refreshToken = "";
 
         /// <summary>
         /// The access token using throughout this service.
@@ -34,43 +40,98 @@ namespace GoogleApis.Blazor.Calendar
         public string AccessToken 
         {
             get => _accessToken;
-            set => _accessToken = value; 
+            set
+            {
+                if (_accessToken != value)
+                {
+                    return;
+                }
+                _accessToken = value;
+                AccessTokenChanged.InvokeAsync().AndForget();
+            }
         }
+
+        /// <summary>
+        /// The refresh token using throughout this service.
+        /// </summary>
+        public string RefreshToken
+        {
+            get => _refreshToken;
+            set
+            {
+                if (_refreshToken != value)
+                {
+                    return;
+                }
+                _refreshToken = value;
+                RefreshTokenChanged.InvokeAsync().AndForget();
+            }
+        }
+
+        /// <summary>
+        /// An event calls when access token changed.
+        /// </summary>
+        public EventCallback AccessTokenChanged { get; set; }
+
+        /// <summary>
+        /// An event calls when refresh token changed.
+        /// </summary>
+        public EventCallback RefreshTokenChanged { get; set; }
 
         #region Calendars
 
         /// <summary>
-        /// Get all calendars that authenticated user has.
+        /// Get all calendars that authenticated user has. Returns max of 250 calendars.
         /// </summary>
         /// <returns></returns>
-        public string GetCalendars()
+        public string GetCalendars(int maxResults = 250, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             //This uses calendar list instead of calendar. Read for the difference https://developers.google.com/calendar/api/concepts/events-calendars#calendar_and_calendar_list
-            var result = client.GetAsync("https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=" + _accessToken).Result;
+            var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults={maxResults.ToString()}&access_token={_accessToken}").Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            GetCalendars();
+            return "";
         }
 
         /// <summary>
         /// Get calendar with given id that authenticated user has.
         /// </summary>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetCalendarById(string calendarId)
+        public string GetCalendarById(string calendarId, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/users/me/calendarList/{calendarId}?access_token=" + _accessToken).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            GetCalendarById(calendarId);
+            return "";
         }
 
         /// <summary>
         /// Get calendar metadata with given summary.
         /// </summary>
         /// <param name="summary"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetCalendarBySummary(string summary)
+        public string GetCalendarBySummary(string summary, bool forceAccessToken = false)
         {
             string calendars = GetCalendars();
             GoogleCalendarListRoot jsonCalendar = JsonSerializer.Deserialize<GoogleCalendarListRoot>(calendars);
@@ -95,15 +156,16 @@ namespace GoogleApis.Blazor.Calendar
                 return "none";
             }
 
-            return GetCalendarById(calendarId);
+            return GetCalendarById(calendarId, forceAccessToken);
         }
 
         /// <summary>
         /// Creates a new secondary calendar into user's CalendarList.
         /// </summary>
         /// <param name="googleCalendarListModel"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns>Returns the request's result content.</returns>
-        public string AddCalendar(GoogleCalendarListModel googleCalendarListModel)
+        public string AddCalendar(GoogleCalendarListModel googleCalendarListModel, bool forceAccessToken = false)
         {
             string requestBody = JsonSerializer.Serialize(googleCalendarListModel);
 
@@ -114,7 +176,16 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars", content).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AddCalendar(googleCalendarListModel);
+            return "";
         }
 
         /// <summary>
@@ -122,8 +193,9 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         /// <param name="calendarId"></param>
         /// <param name="googleCalendarListModel"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string UpdateCalendar(string calendarId, GoogleCalendarListModel googleCalendarListModel)
+        public string UpdateCalendar(string calendarId, GoogleCalendarListModel googleCalendarListModel, bool forceAccessToken = false)
         {
             string requestBody = JsonSerializer.Serialize(googleCalendarListModel);
 
@@ -134,15 +206,25 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}", content).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            UpdateCalendar(calendarId, googleCalendarListModel);
+            return "";
         }
 
         /// <summary>
         /// Deletes the specified calendar. Only deletes the secondary calendars. Use Clear method for primary calendar.
         /// </summary>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string DeleteCalendar(string calendarId)
+        public string DeleteCalendar(string calendarId, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -150,15 +232,25 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.DeleteAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}").Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            DeleteCalendar(calendarId);
+            return "";
         }
 
         /// <summary>
         /// Deletes all events in a primary calendar. If it's a secondary calendar, it has no effect. Use DeleteCalendar for secondary ones.
         /// </summary>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string ClearCalendar(string calendarId)
+        public string ClearCalendar(string calendarId, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -167,7 +259,16 @@ namespace GoogleApis.Blazor.Calendar
 
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/clear", content).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            ClearCalendar(calendarId);
+            return "";
         }
 
         #endregion
@@ -181,13 +282,24 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="calendarId"></param>
         /// <param name="timeMin"></param>
         /// <param name="timeMax"></param>
+        /// <param name="maxResults">Select how many items to return. Max is 2500.</param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEvents(DateTime timeMin, DateTime timeMax, string calendarId)
+        public string GetEvents(DateTime timeMin, DateTime timeMax, string calendarId, int maxResults = 2500, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
-            var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events?access_token={_accessToken}&maxResults=2500").Result;
+            var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events?access_token={_accessToken}&maxResults={maxResults.ToString()}").Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            GetEvents(timeMin, timeMax, calendarId, maxResults);
+            return "";
         }
 
         /// <summary>
@@ -195,13 +307,23 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         /// <param name="calendarId"></param>
         /// <param name="eventId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEventById(string eventId, string calendarId)
+        public string GetEventById(string eventId, string calendarId, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             var result = client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}?access_token=" + _accessToken).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            GetEventById(eventId, calendarId);
+            return "";
         }
 
         /// <summary>
@@ -209,8 +331,9 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         /// <param name="calendarEvent"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string AddEvent(GoogleCalendarEventModel calendarEvent, string calendarId)
+        public string AddEvent(GoogleCalendarEventModel calendarEvent, string calendarId, bool forceAccessToken = false)
         {
             string requestBody = JsonSerializer.Serialize(calendarEvent);
 
@@ -220,17 +343,27 @@ namespace GoogleApis.Blazor.Calendar
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
             var result = client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events", content).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AddEvent(calendarEvent, calendarId);
+            return "";
         }
 
         /// <summary>
-        /// Updates the event. If overwrite is false (by default), it only replaces the specified values, other values will remain same.
+        /// Updates the event.
         /// </summary>
         /// <param name="newCalendarEvent"></param>
         /// <param name="eventId"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string UpdateEvent(GoogleCalendarEventModel newCalendarEvent, string eventId, string calendarId)
+        public string UpdateEvent(GoogleCalendarEventModel newCalendarEvent, string eventId, string calendarId, bool forceAccessToken = false)
         {
             string requestBody = JsonSerializer.Serialize(newCalendarEvent);
 
@@ -252,7 +385,16 @@ namespace GoogleApis.Blazor.Calendar
             //}
             result = client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}", content).Result;
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            UpdateEvent(newCalendarEvent, eventId, calendarId);
+            return "";
         }
 
         /// <summary>
@@ -262,8 +404,9 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="dateMin"></param>
         /// <param name="dateMax"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEventBySummary(string summary, DateTime dateMin, DateTime dateMax, string calendarId)
+        public string GetEventBySummary(string summary, DateTime dateMin, DateTime dateMax, string calendarId, bool forceAccessToken = false)
         {
             string events = GetEvents(dateMin, dateMax, calendarId);
             GoogleCalendarEventRoot jsonEvent = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(events);
@@ -287,7 +430,7 @@ namespace GoogleApis.Blazor.Calendar
                 return "none";
             }
 
-            return GetEventById(eventId, calendarId);
+            return GetEventById(eventId, calendarId, forceAccessToken);
         }
 
         /// <summary>
@@ -296,8 +439,9 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="summary"></param>
         /// <param name="googleCalendarEventRoot"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEventBySummary(string summary, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId)
+        public string GetEventBySummary(string summary, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId, bool forceAccessToken = false)
         {
             string eventId = "";
             if (googleCalendarEventRoot.items == null)
@@ -317,7 +461,7 @@ namespace GoogleApis.Blazor.Calendar
                 return "none";
             }
 
-            return GetEventById(eventId, calendarId);
+            return GetEventById(eventId, calendarId, forceAccessToken);
         }
 
         /// <summary>
@@ -327,8 +471,9 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="dateMin"></param>
         /// <param name="dateMax"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEventByDescription(string description, DateTime dateMin, DateTime dateMax, string calendarId)
+        public string GetEventByDescription(string description, DateTime dateMin, DateTime dateMax, string calendarId, bool forceAccessToken = false)
         {
             string events = GetEvents(dateMin, dateMax, calendarId);
             if (events == "error")
@@ -356,7 +501,7 @@ namespace GoogleApis.Blazor.Calendar
                 return "none";
             }
 
-            return GetEventById(eventId, calendarId);
+            return GetEventById(eventId, calendarId, forceAccessToken);
         }
 
         /// <summary>
@@ -365,8 +510,9 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="description"></param>
         /// <param name="googleCalendarEventRoot"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string GetEventByDescription(string description, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId)
+        public string GetEventByDescription(string description, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId, bool forceAccessToken = false)
         {
             string eventId = "";
             if (googleCalendarEventRoot.items == null)
@@ -386,7 +532,7 @@ namespace GoogleApis.Blazor.Calendar
                 return "none";
             }
 
-            return GetEventById(eventId, calendarId);
+            return GetEventById(eventId, calendarId, forceAccessToken);
         }
 
         /// <summary>
@@ -394,8 +540,9 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         /// <param name="eventId"></param>
         /// <param name="calendarId"></param>
+        /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public string DeleteEvent(string eventId, string calendarId)
+        public string DeleteEvent(string eventId, string calendarId, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -408,7 +555,16 @@ namespace GoogleApis.Blazor.Calendar
                 return "error";
             }
 
-            return result.Content.ReadAsStringAsync().Result;
+            string contentResult = result.Content.ReadAsStringAsync().Result;
+
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            {
+                return contentResult;
+            }
+
+            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            DeleteEvent(eventId, calendarId);
+            return "";
         }
 
         #endregion
@@ -480,6 +636,23 @@ namespace GoogleApis.Blazor.Calendar
                 return calendarId;
             }
 
+        }
+
+        /// <summary>
+        /// Get the primary calendar in calendar list. Returns null if not found.
+        /// </summary>
+        /// <returns></returns>
+        public GoogleCalendarListModel FindPrimaryCalendar()
+        {
+            GoogleCalendarListRoot calendarList = JsonSerializer.Deserialize<GoogleCalendarListRoot>(GetCalendars());
+            foreach (GoogleCalendarListModel item in calendarList.items ?? new List<GoogleCalendarListModel>())
+            {
+                if (item.primary == true)
+                {
+                    return item;
+                }
+            }
+            return null;
         }
 
         /// <summary>

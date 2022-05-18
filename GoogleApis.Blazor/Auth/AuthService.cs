@@ -110,6 +110,31 @@ namespace GoogleApis.Blazor.Auth
         }
 
         /// <summary>
+        /// Refresh and create new access token with given refresh token. This overload only works if credentials stored in appsettings.json.
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        public string RefreshAccessToken(string refreshToken)
+        {
+            string clientId = GetClientId();
+            string clientSecret = GetClientSecret();
+            string encodedRedirectUrl = HttpUtility.UrlEncode(GetRedirectUrl());
+
+            var client = HttpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+            var content = new StringContent($"refresh_token={refreshToken}&client_id={clientId}&client_secret={clientSecret}&redirect_uri={encodedRedirectUrl}&scope=&grant_type=refresh_token", Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var request = client.PostAsync("https://oauth2.googleapis.com/token", content).Result;
+
+            var result = request.Content.ReadAsStringAsync().Result;
+
+            var jsonResult = JsonDocument.Parse(result);
+            string accessToken = jsonResult.RootElement.GetProperty("access_token").ToString();
+
+            return accessToken;
+        }
+
+        /// <summary>
         /// Get client id. Only works when client id stored in appsettings.json. You can choose the root value that google credentials stored.
         /// </summary>
         /// <param name="rootValue"></param>
@@ -127,6 +152,16 @@ namespace GoogleApis.Blazor.Auth
         public string GetClientSecret(string rootValue = "GoogleClient")
         {
             return Configuration.GetSection(rootValue).GetSection("client_secret").Value;
+        }
+
+        /// <summary>
+        /// Get redirect url. Only works when url stored in appsettings.json. You can choose the root value that google credentials stored.
+        /// </summary>
+        /// <param name="rootValue"></param>
+        /// <returns></returns>
+        public string GetRedirectUrl(string rootValue = "GoogleClient")
+        {
+            return Configuration.GetSection(rootValue).GetSection("redirect_url").Value;
         }
 
         /// <summary>
