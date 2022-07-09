@@ -1,4 +1,4 @@
-﻿using GoogleApis.Blazor.Auth;
+using GoogleApis.Blazor.Auth;
 using GoogleApis.Blazor.Extensions;
 using GoogleApis.Blazor.Models;
 using Microsoft.AspNetCore.Components;
@@ -94,7 +94,7 @@ namespace GoogleApis.Blazor.Calendar
                 return model;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await GetCalendars();
         }
 
@@ -117,7 +117,7 @@ namespace GoogleApis.Blazor.Calendar
                 return model;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await GetCalendarById(calendarId);
         }
 
@@ -179,7 +179,7 @@ namespace GoogleApis.Blazor.Calendar
                 return model;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await AddCalendar(googleCalendarListModel);
         }
 
@@ -209,7 +209,7 @@ namespace GoogleApis.Blazor.Calendar
                 return model;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await UpdateCalendar(calendarId, googleCalendarListModel);
         }
 
@@ -234,7 +234,7 @@ namespace GoogleApis.Blazor.Calendar
                 return;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             await DeleteCalendar(calendarId);
         }
 
@@ -260,7 +260,7 @@ namespace GoogleApis.Blazor.Calendar
                 return;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             await ClearCalendar(calendarId);
         }
 
@@ -276,12 +276,19 @@ namespace GoogleApis.Blazor.Calendar
         /// <param name="timeMin"></param>
         /// <param name="timeMax"></param>
         /// <param name="maxResults">Select how many items to return. Max is 2500.</param>
+        /// <param name="timeZone">Time zone used in the response. Optional. The default is the time zone of the calendar.</param>
         /// <param name="forceAccessToken">If true and access token expired, it automatically calls for new access token with refresh token.</param>
         /// <returns></returns>
-        public async Task<GoogleCalendarEventRoot> GetEvents(DateTime timeMin, DateTime timeMax, string calendarId, int maxResults = 2500, bool forceAccessToken = false)
+        public async Task<GoogleCalendarEventRoot> GetEvents(DateTime timeMin, DateTime timeMax, string calendarId, int maxResults = 2500, string timeZone = null, bool forceAccessToken = false)
         {
             var client = HttpClientFactory.CreateClient();
-            var result = await client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events?access_token={_accessToken}&maxResults={maxResults.ToString()}");
+            var uri = $"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events?access_token={_accessToken}&maxResults={maxResults.ToString()}";
+            
+            var result = await client.GetWithQueryStringsAsync(uri, new[] {
+                "timeMin", GetProperDateTimeFormat(timeMin),
+                "timeMax", GetProperDateTimeFormat(timeMax),
+                "timeZone", timeZone
+            });
 
             string contentResult = await result.Content.ReadAsStringAsync();
             var model = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(contentResult);
@@ -291,7 +298,7 @@ namespace GoogleApis.Blazor.Calendar
                 return model;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await GetEvents(timeMin, timeMax, calendarId, maxResults);
         }
 
@@ -315,7 +322,7 @@ namespace GoogleApis.Blazor.Calendar
                 return json;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             return await GetEventById(eventId, calendarId);
         }
 
@@ -343,7 +350,7 @@ namespace GoogleApis.Blazor.Calendar
                 return contentResult;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             await AddEvent(calendarEvent, calendarId);
             return "";
         }
@@ -385,7 +392,7 @@ namespace GoogleApis.Blazor.Calendar
                 return contentResult;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             await UpdateEvent(newCalendarEvent, eventId, calendarId);
             return "";
         }
@@ -553,7 +560,7 @@ namespace GoogleApis.Blazor.Calendar
                 return;
             }
 
-            AccessToken = AuthService.RefreshAccessToken(_refreshToken);
+            AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
             await DeleteEvent(eventId, calendarId);
         }
 
