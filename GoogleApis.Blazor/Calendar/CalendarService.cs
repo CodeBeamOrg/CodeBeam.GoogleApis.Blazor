@@ -95,7 +95,7 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await GetCalendars();
+            return model;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await GetCalendarById(calendarId);
+            return model;
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await AddCalendar(googleCalendarListModel);
+            return model;
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await UpdateCalendar(calendarId, googleCalendarListModel);
+            return model;
         }
 
         /// <summary>
@@ -235,7 +235,6 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            await DeleteCalendar(calendarId);
         }
 
         /// <summary>
@@ -261,7 +260,6 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            await ClearCalendar(calendarId);
         }
 
         #endregion
@@ -299,7 +297,7 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await GetEvents(timeMin, timeMax, calendarId, maxResults);
+            return model;
         }
 
         /// <summary>
@@ -315,15 +313,15 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}?access_token=" + _accessToken);
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var json = JsonSerializer.Deserialize<GoogleCalendarEventModel>(contentResult);
+            var model = JsonSerializer.Deserialize<GoogleCalendarEventModel>(contentResult);
 
             if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
             {
-                return json;
+                return model;
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return await GetEventById(eventId, calendarId);
+            return model;
         }
 
         /// <summary>
@@ -343,16 +341,15 @@ namespace GoogleApis.Blazor.Calendar
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
             var result = await client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events", content);
 
-            string contentResult = await result.Content.ReadAsStringAsync();
+            string model = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(model))
             {
-                return contentResult;
+                return model;
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            await AddEvent(calendarEvent, calendarId);
-            return "";
+            return model;
         }
 
         /// <summary>
@@ -393,7 +390,6 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            await UpdateEvent(newCalendarEvent, eventId, calendarId);
             return "";
         }
 
@@ -561,7 +557,6 @@ namespace GoogleApis.Blazor.Calendar
             }
 
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            await DeleteEvent(eventId, calendarId);
         }
 
         #endregion
