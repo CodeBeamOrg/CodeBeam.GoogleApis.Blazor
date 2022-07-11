@@ -2,14 +2,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace GoogleApis.Blazor.Auth
@@ -69,7 +64,7 @@ namespace GoogleApis.Blazor.Auth
         /// <param name="clientSecret"></param>
         /// <param name="redirectUrl"></param>
         /// <returns></returns>
-        public string AuthorizeCredential(string authorizationCode, string clientId, string clientSecret, string redirectUrl)
+        public async Task<string> AuthorizeCredential(string authorizationCode, string clientId, string clientSecret, string redirectUrl)
         {
             string encodedAuthorizationCode = HttpUtility.UrlEncode(authorizationCode);
             string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
@@ -78,9 +73,9 @@ namespace GoogleApis.Blazor.Auth
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
             var content = new StringContent($"code={encodedAuthorizationCode}&client_id={clientId}&client_secret={clientSecret}&redirect_uri={encodedRedirectUrl}&scope=&grant_type=authorization_code", Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            var request = client.PostAsync("https://oauth2.googleapis.com/token", content).Result;
+            var request = await client.PostAsync("https://oauth2.googleapis.com/token", content);
 
-            return request.Content.ReadAsStringAsync().Result;
+            return await request.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -91,7 +86,7 @@ namespace GoogleApis.Blazor.Auth
         /// <param name="clientSecret"></param>
         /// <param name="redirectUrl"></param>
         /// <returns></returns>
-        public string RefreshAccessToken(string refreshToken, string clientId, string clientSecret, string redirectUrl)
+        public async Task<string> RefreshAccessToken(string refreshToken, string clientId, string clientSecret, string redirectUrl)
         {
             string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
 
@@ -99,9 +94,9 @@ namespace GoogleApis.Blazor.Auth
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
             var content = new StringContent($"refresh_token={refreshToken}&client_id={clientId}&client_secret={clientSecret}&redirect_uri={encodedRedirectUrl}&scope=&grant_type=refresh_token", Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            var request = client.PostAsync("https://oauth2.googleapis.com/token", content).Result;
+            var request = await client.PostAsync("https://oauth2.googleapis.com/token", content);
 
-            var result = request.Content.ReadAsStringAsync().Result;
+            var result = await request.Content.ReadAsStringAsync();
 
             var jsonResult = JsonDocument.Parse(result);
             string accessToken = jsonResult.RootElement.GetProperty("access_token").ToString();
@@ -114,7 +109,7 @@ namespace GoogleApis.Blazor.Auth
         /// </summary>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public string RefreshAccessToken(string refreshToken)
+        public async Task<string> RefreshAccessToken(string refreshToken)
         {
             string clientId = GetClientId();
             string clientSecret = GetClientSecret();
@@ -124,9 +119,9 @@ namespace GoogleApis.Blazor.Auth
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
             var content = new StringContent($"refresh_token={refreshToken}&client_id={clientId}&client_secret={clientSecret}&redirect_uri={encodedRedirectUrl}&scope=&grant_type=refresh_token", Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            var request = client.PostAsync("https://oauth2.googleapis.com/token", content).Result;
+            var request = await client.PostAsync("https://oauth2.googleapis.com/token", content);
 
-            var result = request.Content.ReadAsStringAsync().Result;
+            var result = await request.Content.ReadAsStringAsync();
 
             var jsonResult = JsonDocument.Parse(result);
             string accessToken = jsonResult.RootElement.GetProperty("access_token").ToString();
@@ -198,14 +193,14 @@ namespace GoogleApis.Blazor.Auth
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public string GetUserMail(string accessToken)
+        public async Task<string> GetUserMail(string accessToken)
         {
             var client = HttpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var result = client.GetAsync("https://www.googleapis.com/userinfo/v2/me").Result;
+            var result = await client.GetAsync("https://www.googleapis.com/userinfo/v2/me");
 
-            var jsonResult = JsonDocument.Parse(result.Content.ReadAsStringAsync().Result);
+            var jsonResult = JsonDocument.Parse(await result.Content.ReadAsStringAsync());
             string email = jsonResult.RootElement.GetProperty("email").ToString();
 
             return email;
@@ -232,12 +227,12 @@ namespace GoogleApis.Blazor.Auth
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public string GetAccessTokenDetails(string accessToken)
+        public async Task<string> GetAccessTokenDetails(string accessToken)
         {
             var client = HttpClientFactory.CreateClient();
-            var result = client.GetAsync($"https://oauth2.googleapis.com/tokeninfo?access_token={accessToken}").Result;
-
-            return result.Content.ReadAsStringAsync().Result;
+            var result = await client.GetAsync($"https://oauth2.googleapis.com/tokeninfo?access_token={accessToken}");
+            if (result.StatusCode != System.Net.HttpStatusCode.OK) return null;
+            return await result.Content.ReadAsStringAsync();
         }
 
     }
