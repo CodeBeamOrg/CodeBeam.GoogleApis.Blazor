@@ -90,7 +90,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarListRoot model = JsonSerializer.Deserialize<GoogleCalendarListRoot>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -118,7 +118,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarListModel model = JsonSerializer.Deserialize<GoogleCalendarListModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -185,7 +185,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarModel model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -220,7 +220,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarModel model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -250,7 +250,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
@@ -281,7 +281,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
@@ -324,7 +324,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarEventRoot model = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -353,7 +353,7 @@ namespace GoogleApis.Blazor.Calendar
             string contentResult = await result.Content.ReadAsStringAsync();
             GoogleCalendarEventModel model = JsonSerializer.Deserialize<GoogleCalendarEventModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -386,7 +386,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string model = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(model) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
@@ -432,7 +432,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return contentResult;
             }
@@ -604,7 +604,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
