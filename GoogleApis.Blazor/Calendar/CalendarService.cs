@@ -386,7 +386,7 @@ namespace GoogleApis.Blazor.Calendar
 
             string model = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(model) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
