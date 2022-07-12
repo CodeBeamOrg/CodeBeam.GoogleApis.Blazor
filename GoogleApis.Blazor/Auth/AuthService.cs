@@ -79,7 +79,7 @@ namespace GoogleApis.Blazor.Auth
         }
 
         /// <summary>
-        /// Refresh and create new access token with given resfresh token.
+        /// Refresh and create new access token with given refresh token.
         /// </summary>
         /// <param name="refreshToken"></param>
         /// <param name="clientId"></param>
