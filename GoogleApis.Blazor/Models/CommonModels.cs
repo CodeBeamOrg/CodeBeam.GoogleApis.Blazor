@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace GoogleApis.Blazor.Models
@@ -9,59 +10,86 @@ namespace GoogleApis.Blazor.Models
 {
     public class Creator
     {
-        public string id { get; set; }
-        public string email { get; set; }
-        public string displayName { get; set; }
-        public bool self { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; }
+
+        [JsonPropertyName("self")]
+        public bool Self { get; set; }
     }
 
     public class Start
     {
-        public string dateTime { get; set; }
-        public string timeZone { get; set; }
+        [JsonPropertyName("dateTime")]
+        public string DateTime { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string TimeZone { get; set; }
     }
 
     public class End
     {
-        public string dateTime { get; set; }
-        public string timeZone { get; set; }
+        [JsonPropertyName("dateTime")]
+        public string DateTime { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string TimeZone { get; set; }
     }
 
     public class Organizer
     {
-        public string id { get; set; }
-        public string email { get; set; }
-        public string displayName { get; set; }
-        public bool self { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; }
+
+        [JsonPropertyName("self")]
+        public bool Self { get; set; }
     }
 
     public class Reminders
     {
-        public bool useDefault { get; set; }
+        [JsonPropertyName("useDefault")]
+        public bool UseDefault { get; set; }
     }
 
     public class ConferenceProperties
     {
-        public List<string> allowedConferenceSolutionTypes { get; set; }
+        [JsonPropertyName("allowedConferenceSolutionTypes")]
+        public List<string> AllowedConferenceSolutionTypes { get; set; }
     }
 
     public class DefaultReminder
     {
-        public string method { get; set; }
-        public int minutes { get; set; }
+        [JsonPropertyName("method")]
+        public string Method { get; set; }
+
+        [JsonPropertyName("minutes")]
+        public int Minutes { get; set; }
     }
-
-
 
     public class Notification
     {
-        public string type { get; set; }
-        public string method { get; set; }
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("method")]
+        public string Method { get; set; }
     }
 
     public class NotificationSettings
     {
-        public List<Notification> notifications { get; set; }
+        [JsonPropertyName("notifications")]
+        public List<Notification> Notifications { get; set; }
     }
 
 

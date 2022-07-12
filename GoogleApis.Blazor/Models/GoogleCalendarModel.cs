@@ -1,4 +1,6 @@
-﻿namespace GoogleApis.Blazor.Models
+﻿using System.Text.Json.Serialization;
+
+namespace GoogleApis.Blazor.Models
 #pragma warning disable CS1591
 {
     /// <summary>
@@ -6,13 +8,28 @@
     /// </summary>
     public class GoogleCalendarModel
     {
-        public string kind { get; private set; } = "calendar#calendar";
-        public string etag { get; set; }
-        public string id { get; set; }
-        public string summary { get; set; }
-        public string description { get; set; }
-        public string location { get; set; }
-        public string timeZone { get; set; }
-        public ConferenceProperties conferenceProperties { get; set; }
+        [JsonPropertyName("kind")]
+        public string Kind { get; private set; } = "calendar#calendar";
+
+        [JsonPropertyName("etag")]
+        public string Etag { get; set; }
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string TimeZone { get; set; }
+
+        [JsonPropertyName("conferenceProperties")]
+        public ConferenceProperties ConferenceProperties { get; set; }
     }    
 }

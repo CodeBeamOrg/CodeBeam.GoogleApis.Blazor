@@ -1,4 +1,6 @@
-﻿namespace GoogleApis.Blazor.Models
+﻿using System.Text.Json.Serialization;
+
+namespace GoogleApis.Blazor.Models
 #pragma warning disable CS1591
 {
     /// <summary>
@@ -6,42 +8,102 @@
     /// </summary>
     public class GoogleCalendarEventRoot
     {
-        public string kind { get; set; } = "calendar#events";
-        public string etag { get; set; }
-        public string summary { get; set; }
-        public string description { get; set; }
-        public string updated { get; set; }
-        public string timeZone { get; set; }
-        public string accessRole { get; set; }
-        public List<DefaultReminder> defaultReminders { get; set; }
-        public string nextPageToken { get; set; }
-        public string nextSyncToken { get; set; }
-        public List<GoogleCalendarEventModel> items { get; set; }
+        [JsonPropertyName("kind")]
+        public string Kind { get; set; } = "calendar#events";
+        
+        [JsonPropertyName("etag")]
+        public string Etag { get; set; }
+        
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("updated")]
+        public string Updated { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string TimeZone { get; set; }
+
+        [JsonPropertyName("accessRole")]
+        public string AccessRole { get; set; }
+
+        [JsonPropertyName("defaultReminders")]
+        public List<DefaultReminder> DefaultReminders { get; set; }
+
+        [JsonPropertyName("nextPageToken")]
+        public string NextPageToken { get; set; }
+
+        [JsonPropertyName("nextSyncToken")]
+        public string NextSyncToken { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<GoogleCalendarEventModel> Items { get; set; }
     }
 
     public class GoogleCalendarEventModel
     {
-        public string kind { get; set; } = "calendar#event";
-        public string etag { get; set; } = "";
-        public string id { get; set; } = "";
-        public string status { get; set; } = "confirmed";
+        [JsonPropertyName("kind")]
+        public string Kind { get; set; } = "calendar#event";
+
+        [JsonPropertyName("etag")]
+        public string Etag { get; set; } = "";
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = "";
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = "confirmed";
+
+        [JsonPropertyName("htmlLink")]
         public string htmlLink { get; set; } = "";
+
         //public DateTime created { get; set; }
         //public DateTime updated { get; set; }
-        public string summary { get; set; }
-        public string description { get; set; }
-        public string location { get; set; }
+
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("location")]
+        public string Location { get; set; }
+
         //public string colorId { get; set; }
-        public Creator creator { get; set; } = new();
-        public Organizer organizer { get; set; } = new();
-        public Start start { get; set; } = new();
-        public End end { get; set; } = new();
-        public bool endTimeUnspecified { get; set; }
-        public string transparency { get; set; } = "opaque";
-        public string visibility { get; set; } = "default";
-        public string iCalUID { get; set; } = "";
-        public int sequence { get; set; }
-        public Reminders reminders { get; set; } = new();
-        public string eventType { get; set; } = "default";
+
+        [JsonPropertyName("creator")]
+        public Creator Creator { get; set; } = new();
+
+        [JsonPropertyName("organizer")]
+        public Organizer Organizer { get; set; } = new();
+
+        [JsonPropertyName("start")]
+        public Start Start { get; set; } = new();
+
+        [JsonPropertyName("end")]
+        public End End { get; set; } = new();
+
+        [JsonPropertyName("endTimeUnspecified")]
+        public bool EndTimeUnspecified { get; set; }
+
+        [JsonPropertyName("transparency")]
+        public string Transparency { get; set; } = "opaque";
+
+        [JsonPropertyName("visibility")]
+        public string Visibility { get; set; } = "default";
+
+        [JsonPropertyName("iCalUID")]
+        public string ICalUID { get; set; } = "";
+
+        [JsonPropertyName("sequence")]
+        public int Sequence { get; set; }
+
+        [JsonPropertyName("reminders")]
+        public Reminders Reminders { get; set; } = new();
+
+        [JsonPropertyName("eventType")]
+        public string EventType { get; set; } = "default";
     }
 }

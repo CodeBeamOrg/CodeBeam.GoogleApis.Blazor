@@ -1,4 +1,6 @@
-﻿namespace GoogleApis.Blazor.Models
+﻿using System.Text.Json.Serialization;
+
+namespace GoogleApis.Blazor.Models
 #pragma warning disable CS1591
 {
     /// <summary>
@@ -6,34 +8,79 @@
     /// </summary>
     public class GoogleCalendarListRoot
     {
-        public string kind { get; set; } = "calendar#calendarList";
-        public string etag { get; set; }
-        public string nextPageToken { get; set; }
-        public string nextSyncToken { get; set; }
-        public List<GoogleCalendarListModel> items { get; set; }
+        [JsonPropertyName("kind")]
+        public string Kind { get; set; } = "calendar#calendarList";
+
+        [JsonPropertyName("etag")]
+        public string Etag { get; set; }
+
+        [JsonPropertyName("nextPageToken")]
+        public string NextPageToken { get; set; }
+
+        [JsonPropertyName("nextSyncToken")]
+        public string NextSyncToken { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<GoogleCalendarListModel> Items { get; set; }
     }
 
     public class GoogleCalendarListModel
     {
-        public string kind { get; set; } = "calendar#calendarListEntry";
-        public string etag { get; set; }
-        public string id { get; set; }
-        public string summary { get; set; }
-        public string summaryOverride { get; set; }
-        public string description { get; set; }
-        public string location { get; set; }
-        public string timeZone { get; set; }
+        [JsonPropertyName("kind")]
+        public string Kind { get; set; } = "calendar#calendarListEntry";
+
+        [JsonPropertyName("etag")]
+        public string Etag { get; set; }
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; }
+
+        [JsonPropertyName("summaryOverride")]
+        public string SummaryOverride { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string TimeZone { get; set; }
+
         //public string colorId { get; set; }
-        public string backgroundColor { get; set; }
-        public string foregroundColor { get; set; }
-        public bool hidden { get; set; }
-        public bool selected { get; set; }
-        public string accessRole { get; set; }
-        public List<DefaultReminder> defaultReminders { get; set; }
-        public ConferenceProperties conferenceProperties { get; set; }
-        public NotificationSettings notificationSettings { get; set; }
-        public bool? primary { get; set; }
-        public bool deleted { get; set; }
+
+        [JsonPropertyName("backgroundColor")]
+        public string BackgroundColor { get; set; }
+
+        [JsonPropertyName("foregroundColor")]
+        public string ForegroundColor { get; set; }
+
+        [JsonPropertyName("hidden")]
+        public bool Hidden { get; set; }
+
+        [JsonPropertyName("selected")]
+        public bool Selected { get; set; }
+
+        [JsonPropertyName("accessRole")]
+        public string AccessRole { get; set; }
+
+        [JsonPropertyName("defaultReminders")]
+        public List<DefaultReminder> DefaultReminders { get; set; }
+
+        [JsonPropertyName("conferenceProperties")]
+        public ConferenceProperties ConferenceProperties { get; set; }
+
+        [JsonPropertyName("notificationSettings")]
+        public NotificationSettings NotificationSettings { get; set; }
+
+        [JsonPropertyName("primary")]
+        public bool? Primary { get; set; }
+
+        [JsonPropertyName("deleted")]
+        public bool Deleted { get; set; }
     }
     
 }

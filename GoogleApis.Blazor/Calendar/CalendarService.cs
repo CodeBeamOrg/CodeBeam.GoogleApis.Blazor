@@ -74,6 +74,7 @@ namespace GoogleApis.Blazor.Calendar
         /// </summary>
         public EventCallback RefreshTokenChanged { get; set; }
 
+
         #region Calendars
 
         /// <summary>
@@ -87,14 +88,19 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.GetAsync($"https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults={maxResults.ToString()}&access_token={_accessToken}");
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarListRoot>(contentResult);
+            GoogleCalendarListRoot model = JsonSerializer.Deserialize<GoogleCalendarListRoot>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await GetCalendars(maxResults);
+            }
             return model;
         }
 
@@ -110,14 +116,19 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.GetAsync($"https://www.googleapis.com/calendar/v3/users/me/calendarList/{calendarId}?access_token=" + _accessToken);
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarListModel>(contentResult);
+            GoogleCalendarListModel model = JsonSerializer.Deserialize<GoogleCalendarListModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await GetCalendarById(calendarId);
+            }
             return model;
         }
 
@@ -131,17 +142,17 @@ namespace GoogleApis.Blazor.Calendar
         {
             var calendars = await GetCalendars();
 
-            if (calendars.items == null)
+            if (calendars.Items == null)
             {
                 return null;
             }
 
             string calendarId = "";
-            foreach (var item in calendars.items)
+            foreach (var item in calendars.Items)
             {
-                if (item.summary == summary)
+                if (item.Summary == summary)
                 {
-                    calendarId = item.id;
+                    calendarId = item.Id;
                     break;
                 }
             }
@@ -172,14 +183,19 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.PostAsync($"https://www.googleapis.com/calendar/v3/calendars", content);
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
+            GoogleCalendarModel model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await AddCalendar(googleCalendarListModel);
+            }
             return model;
         }
 
@@ -202,14 +218,19 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.PutAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}", content);
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
+            GoogleCalendarModel model = JsonSerializer.Deserialize<GoogleCalendarModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await UpdateCalendar(calendarId, googleCalendarListModel);
+            }
             return model;
         }
 
@@ -229,12 +250,18 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                await DeleteCalendar(calendarId);
+            }
+            return;
         }
 
         /// <summary>
@@ -254,12 +281,18 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                await ClearCalendar(calendarId);
+            }
+            return;
         }
 
         #endregion
@@ -289,14 +322,19 @@ namespace GoogleApis.Blazor.Calendar
             });
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(contentResult);
+            GoogleCalendarEventRoot model = JsonSerializer.Deserialize<GoogleCalendarEventRoot>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await GetEvents(timeMin, timeMax, calendarId, maxResults, timeZone);
+            }
             return model;
         }
 
@@ -313,14 +351,19 @@ namespace GoogleApis.Blazor.Calendar
             var result = await client.GetAsync($"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}?access_token=" + _accessToken);
 
             string contentResult = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize<GoogleCalendarEventModel>(contentResult);
+            GoogleCalendarEventModel model = JsonSerializer.Deserialize<GoogleCalendarEventModel>(contentResult);
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await GetEventById(eventId, calendarId);
+            }
             return model;
         }
 
@@ -343,12 +386,17 @@ namespace GoogleApis.Blazor.Calendar
 
             string model = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(model))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return model;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                model = await AddEvent(calendarEvent, calendarId);
+            }
             return model;
         }
 
@@ -384,13 +432,18 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return contentResult;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
-            return "";
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                contentResult = await UpdateEvent(newCalendarEvent, eventId, calendarId);
+            }
+            return contentResult;
         }
 
         /// <summary>
@@ -406,17 +459,17 @@ namespace GoogleApis.Blazor.Calendar
         {
             var events = await GetEvents(dateMin, dateMax, calendarId);
 
-            if (events.items == null)
+            if (events.Items == null)
             {
                 return null;
             }
 
             string eventId = "";
-            foreach (var item in events.items)
+            foreach (var item in events.Items)
             {
-                if (item.summary == summary)
+                if (item.Summary == summary)
                 {
-                    eventId = item.id;
+                    eventId = item.Id;
                 }
             }
 
@@ -439,15 +492,15 @@ namespace GoogleApis.Blazor.Calendar
         public async Task<GoogleCalendarEventModel> GetEventBySummary(string summary, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId, bool forceAccessToken = false)
         {
             string eventId = "";
-            if (googleCalendarEventRoot.items == null)
+            if (googleCalendarEventRoot.Items == null)
             {
                 return null;
             }
-            foreach (var calendarEvent in googleCalendarEventRoot.items)
+            foreach (var calendarEvent in googleCalendarEventRoot.Items)
             {
-                if (calendarEvent.summary == summary)
+                if (calendarEvent.Summary == summary)
                 {
-                    eventId = calendarEvent.id;
+                    eventId = calendarEvent.Id;
                 }
             }
 
@@ -476,17 +529,17 @@ namespace GoogleApis.Blazor.Calendar
                 return null;
             }
 
-            if (events.items == null)
+            if (events.Items == null)
             {
                 return null;
             }
 
             string eventId = "";
-            foreach (var item in events.items)
+            foreach (var item in events.Items)
             {
-                if (item.description == description)
+                if (item.Description == description)
                 {
-                    eventId = item.id;
+                    eventId = item.Id;
                 }
             }
 
@@ -509,15 +562,15 @@ namespace GoogleApis.Blazor.Calendar
         public async Task<GoogleCalendarEventModel> GetEventByDescription(string description, GoogleCalendarEventRoot googleCalendarEventRoot, string calendarId, bool forceAccessToken = false)
         {
             string eventId = "";
-            if (googleCalendarEventRoot.items == null)
+            if (googleCalendarEventRoot.Items == null)
             {
                 return null;
             }
-            foreach (var calendarEvent in googleCalendarEventRoot.items)
+            foreach (var calendarEvent in googleCalendarEventRoot.Items)
             {
-                if (calendarEvent.description == description)
+                if (calendarEvent.Description == description)
                 {
-                    eventId = calendarEvent.id;
+                    eventId = calendarEvent.Id;
                 }
             }
 
@@ -551,12 +604,18 @@ namespace GoogleApis.Blazor.Calendar
 
             string contentResult = await result.Content.ReadAsStringAsync();
 
-            if (forceAccessToken == false || !AuthService.IsAccessTokenExpired(contentResult))
+            if (forceAccessToken == false || result.IsSuccessStatusCode || !AuthService.IsAccessTokenExpired(contentResult) || string.IsNullOrEmpty(RefreshToken))
             {
                 return;
             }
 
+            string oldAccessToken = AccessToken;
             AccessToken = await AuthService.RefreshAccessToken(_refreshToken);
+            if (!string.IsNullOrEmpty(AccessToken) && oldAccessToken != AccessToken)
+            {
+                await DeleteEvent(eventId, calendarId);
+            }
+            return;
         }
 
         #endregion
@@ -578,7 +637,7 @@ namespace GoogleApis.Blazor.Calendar
                 return null;
             }
 
-            if (calendars.items == null)
+            if (calendars.Items == null)
             {
                 return "none";
             }
@@ -586,33 +645,33 @@ namespace GoogleApis.Blazor.Calendar
             string calendarId = "";
             if (valueType == CalendarValueType.Summary)
             {
-                foreach (var item in calendars.items)
+                foreach (var item in calendars.Items)
                 {
-                    if (item.summary == val.ToString())
+                    if (item.Summary == val.ToString())
                     {
-                        calendarId = item.id;
+                        calendarId = item.Id;
                         break;
                     }
                 }
             }
             else if (valueType == CalendarValueType.Description)
             {
-                foreach (var item in calendars.items)
+                foreach (var item in calendars.Items)
                 {
-                    if (item.description == val.ToString())
+                    if (item.Description == val.ToString())
                     {
-                        calendarId = item.id;
+                        calendarId = item.Id;
                         break;
                     }
                 }
             }
             else if (valueType == CalendarValueType.Location)
             {
-                foreach (var item in calendars.items)
+                foreach (var item in calendars.Items)
                 {
-                    if (item.location == val.ToString())
+                    if (item.Location == val.ToString())
                     {
-                        calendarId = item.id;
+                        calendarId = item.Id;
                         break;
                     }
                 }
@@ -636,9 +695,9 @@ namespace GoogleApis.Blazor.Calendar
         public async Task<GoogleCalendarListModel> FindPrimaryCalendar()
         {
             var calendarList = await GetCalendars();
-            foreach (GoogleCalendarListModel item in calendarList.items ?? new List<GoogleCalendarListModel>())
+            foreach (GoogleCalendarListModel item in calendarList.Items ?? new List<GoogleCalendarListModel>())
             {
-                if (item.primary == true)
+                if (item.Primary == true)
                 {
                     return item;
                 }
@@ -658,7 +717,7 @@ namespace GoogleApis.Blazor.Calendar
         public async Task<string> FindEventId(EventValueType valueType, object val, DateTime timeMin, DateTime timeMax, string calendarId)
         {
             var googleCalendarEventRoot = await GetEvents(timeMin, timeMax, calendarId);
-            if (googleCalendarEventRoot.items == null)
+            if (googleCalendarEventRoot.Items == null)
             {
                 return "none";
             }
@@ -666,33 +725,33 @@ namespace GoogleApis.Blazor.Calendar
             string eventId = "";
             if (valueType == EventValueType.Summary)
             {
-                foreach (var item in googleCalendarEventRoot.items)
+                foreach (var item in googleCalendarEventRoot.Items)
                 {
-                    if (item.summary == val.ToString())
+                    if (item.Summary == val.ToString())
                     {
-                        eventId = item.id;
+                        eventId = item.Id;
                         break;
                     }
                 }
             }
             else if (valueType == EventValueType.Description)
             {
-                foreach (var item in googleCalendarEventRoot.items)
+                foreach (var item in googleCalendarEventRoot.Items)
                 {
-                    if (item.description == val.ToString())
+                    if (item.Description == val.ToString())
                     {
-                        eventId = item.id;
+                        eventId = item.Id;
                         break;
                     }
                 }
             }
             else if (valueType == EventValueType.Location)
             {
-                foreach (var item in googleCalendarEventRoot.items)
+                foreach (var item in googleCalendarEventRoot.Items)
                 {
-                    if (item.location == val.ToString())
+                    if (item.Location == val.ToString())
                     {
-                        eventId = item.id;
+                        eventId = item.Id;
                         break;
                     }
                 }
