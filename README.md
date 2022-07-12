@@ -10,7 +10,7 @@
 This repo is still in earlier stage of development, but all completed parts already tested with real world applications.
 
 ## Documentation
-Please look at examples.
+Please look at *[API](https://github.com/CodeBeamOrg/CodeBeam.GoogleApis.Blazor/blob/master/Api.md)*.
 
 
 ## Contributing
@@ -56,11 +56,11 @@ OR - For cs files
 ```cs
 private void CreateCalendar()
 {
-    GoogleCalendarListModel googleCalendarListModel = new GoogleCalendarListModel()
+    GoogleCalendarListModel googleCalendarListModel = new()
     {
-        summary = "Test Calendar",
-        description = "Created By CodeBeam",
-        timeZone = "Europe/Istanbul",
+        Summary = "Test Calendar",
+        Description = "Created By CodeBeam",
+        TimeZone = "Europe/Istanbul",
     };
     CalendarService.AddCalendar(googleCalendarListModel);
 }
@@ -115,10 +115,10 @@ private void AddEvent()
 {
     GoogleCalendarEventModel googleCalendarEvent = new()
     {
-        summary = "Test Event",
-        description = "Some Description",
-        start = new Start { dateTime = CalendarService.GetProperDateTimeFormat(DateTime.Now) },
-        end = new End { dateTime = CalendarService.GetProperDateTimeFormat(DateTime.Now) },
+        Summary = "Test Event",
+        Description = "Some Description",
+        Start = new Start { dateTime = CalendarService.GetProperDateTimeFormat(DateTime.Now) },
+        End = new End { dateTime = CalendarService.GetProperDateTimeFormat(DateTime.Now) },
     };
     // If you don't know the id of calendar which will the event be added, use FindCalendarId method. In this case, the event added the calendar which has "Test Calendar" title.
     string result = CalendarService.AddEvent(googleCalendarEvent, CalendarService.FindCalendarId(CalendarValueType.Summary, "Test Calendar"));
@@ -137,6 +137,5 @@ When you call the api to return a list of items (like calendars or events) it re
 
 #### Usage
 ```cs
-var result = CalendarService.GetCalendars();
-GoogleCalendarListRoot _calendars = JsonSerializer.Deserialize<GoogleCalendarListRoot>(result); // _calendars.items has the list of calendars.
+GoogleCalendarListRoot calendars = CalendarService.GetCalendars(); // calendars.items has the list of calendars.
 ```
