@@ -6,6 +6,7 @@
 [![Contributors](https://img.shields.io/github/contributors/codebeamorg/codebeam.googleapis.blazor?color=594ae2&style=flat-square&logo=github)](https://github.com/codebeamorg/codebeam.googleapis.blazor/graphs/contributors)
 [![Nuget version](https://img.shields.io/nuget/v/CodeBeam.GoogleApis.Blazor?color=ff4081&label=nuget%20version&logo=nuget&style=flat-square)](https://www.nuget.org/packages/codebeam.googleapis.blazor/)
 [![Nuget downloads](https://img.shields.io/nuget/dt/CodeBeam.GoogleApis.Blazor?color=ff4081&label=nuget%20downloads&logo=nuget&style=flat-square)](https://www.nuget.org/packages/codebeam.googleapis.blazor/)
+[![Discord](https://img.shields.io/discord/1459498792192839774?color=%237289da&label=Discord&logo=discord&logoColor=%237289da&style=flat-square)](https://discord.gg/QscA86dXSR)
 
 This repo is still in earlier stage of development, but all completed parts already tested with real world applications.
 
