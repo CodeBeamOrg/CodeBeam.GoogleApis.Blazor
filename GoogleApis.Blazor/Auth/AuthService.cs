@@ -53,7 +53,7 @@ namespace GoogleApis.Blazor.Auth
             }
             string scopeString = string.Join("+", scopeStringList);
 
-            await JSRuntime.InvokeAsync<object>("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt={promptType.ToDescriptionString()}", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt={promptType.ToDescriptionString()}", "_blank");
         }
 
         /// <summary>
