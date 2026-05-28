@@ -41,19 +41,25 @@ namespace GoogleApis.Blazor.Auth
         /// <returns></returns>
         public async Task RequestAuthorizationCode(string clientId, List<Scope> scopes, string redirectUrl, PromptType promptType = PromptType.Consent)
         {
-            string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
             if (scopes == null || scopes.Count == 0)
             {
                 return;
             }
-            List<string> scopeStringList = new List<string>();
-            foreach (var scope in scopes)
-            {
-                scopeStringList.Add(scope.ToDescriptionString());
-            }
-            string scopeString = string.Join("+", scopeStringList);
 
-            await JSRuntime.InvokeVoidAsync("open", $"https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={encodedRedirectUrl}&flowName=GeneralOAuthFlow&access_type=offline&prompt={promptType.ToDescriptionString()}", "_blank");
+            string encodedRedirectUrl = HttpUtility.UrlEncode(redirectUrl);
+
+            string encodedScopes = HttpUtility.UrlEncode(string.Join(" ", scopes.Select(x => x.ToDescriptionString())));
+
+            string url =
+                $"https://accounts.google.com/o/oauth2/v2/auth" +
+                $"?response_type=code" +
+                $"&client_id={clientId}" +
+                $"&scope={encodedScopes}" +
+                $"&redirect_uri={encodedRedirectUrl}" +
+                $"&access_type=offline" +
+                $"&prompt={promptType.ToDescriptionString()}";
+
+            await JSRuntime.InvokeVoidAsync("open", url, "_blank");
         }
 
         /// <summary>
